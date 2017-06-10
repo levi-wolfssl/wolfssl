@@ -25,7 +25,7 @@
 
 #include <wolfssl/wolfcrypt/settings.h>
 
-#if defined(HAVE_CURVE25519) || defined(HAVE_ED25519)
+#ifdef HAVE_CURVE25519
 
 #ifndef CURVED25519_SMALL
     #include <stdint.h>
@@ -49,15 +49,19 @@ Bounds on each t[i] vary depending on context.
     typedef int32_t  fe[10];
 #endif
 
-#if! defined FREESCALE_LTC_ECC
-WOLFSSL_LOCAL int  curve25519(byte * q, byte * n, byte * p);
-#endif
+
 WOLFSSL_LOCAL void fe_copy(fe, const fe);
 WOLFSSL_LOCAL void fe_add(fe, const fe, const fe);
 WOLFSSL_LOCAL void fe_neg(fe,const fe);
 WOLFSSL_LOCAL void fe_sub(fe, const fe, const fe);
 WOLFSSL_LOCAL void fe_invert(fe, const fe);
 WOLFSSL_LOCAL void fe_mul(fe,const fe,const fe);
+
+
+#if !defined(FREESCALE_LTC_ECC)
+WOLFSSL_LOCAL int  curve25519(byte * q, byte * n, byte * p);
+#endif
+
 
 /* default to be faster but take more memory */
 #ifndef CURVED25519_SMALL
@@ -81,7 +85,7 @@ WOLFSSL_LOCAL void fe_pow22523(fe,const fe);
 /* 64 type needed for SHA512 */
 WOLFSSL_LOCAL uint64_t load_3(const unsigned char *in);
 WOLFSSL_LOCAL uint64_t load_4(const unsigned char *in);
-#endif /* not defined CURVED25519_SMALL */
+#endif /* !CURVED25519_SMALL */
 
 /* Use less memory and only 32bit types or less, but is slower
    Based on Daniel Beer's public domain work. */
@@ -131,7 +135,8 @@ WOLFSSL_LOCAL void fprime_sub(byte *r, const byte *a, const byte *modulus);
 WOLFSSL_LOCAL void fprime_mul(byte *r, const byte *a, const byte *b,
 		                      const byte *modulus);
 WOLFSSL_LOCAL void fprime_copy(byte *x, const byte *a);
-#endif /* CURVED25519_SMALL */
-#endif /* HAVE_CURVE25519 or HAVE_ED25519 */
-#endif /* WOLF_CRYPT_FE_OPERATIONS_H */
 
+#endif /* CURVED25519_SMALL */
+#endif /* HAVE_CURVE25519 */
+
+#endif /* WOLF_CRYPT_FE_OPERATIONS_H */

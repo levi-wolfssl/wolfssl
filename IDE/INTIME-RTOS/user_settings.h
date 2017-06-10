@@ -211,6 +211,7 @@ extern "C" {
     /* Optionally use small math (less flash usage, but much slower) */
     #if 0
         #define CURVED25519_SMALL
+        #define ED25519_SMALL
     #endif
 #endif
 

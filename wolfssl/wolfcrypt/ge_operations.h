@@ -29,10 +29,49 @@
 
 #ifdef HAVE_ED25519
 
-#ifndef CURVED25519_SMALL
+#ifndef ED25519_SMALL
     #include <stdint.h>
 #endif
 #include <wolfssl/wolfcrypt/fe_operations.h>
+
+
+/* common fe/ge math functions */
+/* if fe and ge memory options differ */
+#if ((defined(ED25519_SMALL) && !defined(CURVED25519_SMALL)) || \
+     !defined(ED25519_SMALL) &&  defined(CURVED25519_SMALL))
+
+    #define ENABLE_GE25519_MATH
+
+    #ifdef ED25519_SMALL
+        #define G25519_SIZE 32
+        typedef byte     ge[32];
+    #elif defined(HAVE___UINT128_T)
+        typedef int64_t  ge[5];
+    #else
+        typedef int32_t  ge[10];
+    #endif
+
+    /* the ge and fe types are different, so need ge versions */
+    WOLFSSL_LOCAL void ge_copy(ge, const ge);
+    WOLFSSL_LOCAL void ge_add(ge, const ge, const ge);
+    WOLFSSL_LOCAL void ge_neg(ge,const ge);
+    WOLFSSL_LOCAL void ge_sub(ge, const ge, const ge);
+    WOLFSSL_LOCAL void ge_invert(ge, const ge);
+    WOLFSSL_LOCAL void ge_mul(ge,const ge,const ge);
+#else
+    /* use fe versions */
+    #ifdef ED25519_SMALL
+        #define G25519_SIZE F25519_SIZE
+    #endif
+    typedef fe ge;
+    #define ge_copy   fe_copy
+    #define ge_add    fe_add
+    #define ge_neg    fe_neg
+    #define ge_sub    fe_sub
+    #define ge_invert fe_invert
+    #define ge_mul    fe_mul
+#endif
+
 
 /*
 ge means group element.
@@ -48,19 +87,19 @@ Representations:
   ge_precomp (Duif): (y+x,y-x,2dxy)
 */
 
-
 typedef struct {
-  fe X;
-  fe Y;
-  fe Z;
+  ge X;
+  ge Y;
+  ge Z;
 } ge_p2;
 
 typedef struct {
-  fe X;
-  fe Y;
-  fe Z;
-  fe T;
+  ge X;
+  ge Y;
+  ge Z;
+  ge T;
 } ge_p3;
+
 
 WOLFSSL_LOCAL int  ge_compress_key(byte* out, const byte* xIn, const byte* yIn,
                                                                 word32 keySz);
@@ -75,7 +114,7 @@ WOLFSSL_LOCAL void sc_muladd(byte* s, const byte* a, const byte* b,
 WOLFSSL_LOCAL void ge_tobytes(unsigned char *,const ge_p2 *);
 WOLFSSL_LOCAL void ge_p3_tobytes(unsigned char *,const ge_p3 *);
 
-#ifndef CURVED25519_SMALL
+#ifndef ED25519_SMALL
 typedef struct {
   fe X;
   fe Y;
@@ -110,7 +149,8 @@ WOLFSSL_LOCAL void ge_madd(ge_p1p1 *,const ge_p3 *,const ge_precomp *);
 WOLFSSL_LOCAL void ge_msub(ge_p1p1 *,const ge_p3 *,const ge_precomp *);
 WOLFSSL_LOCAL void ge_add(ge_p1p1 *,const ge_p3 *,const ge_cached *);
 WOLFSSL_LOCAL void ge_sub(ge_p1p1 *,const ge_p3 *,const ge_cached *);
-#endif /* no CURVED25519_SMALL */
-#endif /* HAVE_ED25519 */
-#endif /* WOLF_CRYPT_GE_OPERATIONS_H */
+#endif /* !ED25519_SMALL */
 
+#endif /* HAVE_ED25519 */
+
+#endif /* WOLF_CRYPT_GE_OPERATIONS_H */

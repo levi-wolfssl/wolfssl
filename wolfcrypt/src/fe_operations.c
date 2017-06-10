@@ -28,8 +28,8 @@
 
 #include <wolfssl/wolfcrypt/settings.h>
 
+#ifdef HAVE_CURVE25519
 #ifndef CURVED25519_SMALL /* run when not defined to use small memory math */
-#if defined(HAVE_ED25519) || defined(HAVE_CURVE25519)
 
 #include <wolfssl/wolfcrypt/fe_operations.h>
 #include <stdint.h>
@@ -1411,6 +1411,6 @@ void fe_cmov(fe f, const fe g, int b)
   f[9] = f9 ^ x9;
 }
 #endif
-#endif /* HAVE ED25519 or CURVE25519 */
-#endif /* not defined CURVED25519_SMALL */
 
+#endif /* !CURVED25519_SMALL */
+#endif /* HAVE_CURVE25519 */

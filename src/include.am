@@ -236,7 +236,7 @@ endif
 endif
 
 if BUILD_GEMATH
-if BUILD_CURVED25519_SMALL
+if BUILD_ED25519_SMALL
 src_libwolfssl_la_SOURCES += wolfcrypt/src/ge_low_mem.c
 else
 src_libwolfssl_la_SOURCES += wolfcrypt/src/ge_operations.c

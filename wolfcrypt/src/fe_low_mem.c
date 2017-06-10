@@ -28,8 +28,8 @@
 
 #include <wolfssl/wolfcrypt/settings.h>
 
-#if defined(CURVED25519_SMALL) /* use slower code that takes less memory */
-#if defined(HAVE_ED25519) || defined(HAVE_CURVE25519)
+#ifdef HAVE_CURVE25519
+#ifdef CURVED25519_SMALL /* use slower code that takes less memory */
 
 #include <wolfssl/wolfcrypt/fe_operations.h>
 
@@ -595,5 +595,5 @@ void fe_sqrt(byte *r, const byte *a)
 	fe_mul__distinct(r, x, i);
 }
 
-#endif /* HAVE_CURVE25519 or HAVE_ED25519 */
 #endif /* CURVED25519_SMALL */
+#endif /* HAVE_CURVE25519 */

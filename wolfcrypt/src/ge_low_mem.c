@@ -28,8 +28,8 @@
 
 #include <wolfssl/wolfcrypt/settings.h>
 
-#if defined(CURVED25519_SMALL) /* use slower code that takes less memory */
-#if defined(HAVE_ED25519)
+#ifdef HAVE_ED25519
+#ifdef ED25519_SMALL /* use slower code that takes less memory */
 
 #include <wolfssl/wolfcrypt/ge_operations.h>
 #include <wolfssl/wolfcrypt/error-crypt.h>
@@ -45,7 +45,7 @@ void ed25519_add(ge_p3 *r, const ge_p3 *a, const ge_p3 *b);
 void ed25519_double(ge_p3 *r, const ge_p3 *a);
 
 
-static const byte ed25519_order[F25519_SIZE] = {
+static const byte ed25519_order[G25519_SIZE] = {
     0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58,
     0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -68,19 +68,36 @@ static const word32 mu[33] = {
     0xFF,0xFF,0xFF,0xFF,0x0F
 };
 
+#ifdef ENABLE_GE25519_MATH
+void gprime_copy(byte *x, const byte *a)
+{
+    int i;
+    for (i = 0; i < G25519_SIZE; i++)
+        x[i] = a[i];
+}
+
+
+void ge_copy(ge x, const ge a)
+{
+    int i;
+    for (i = 0; i < G25519_SIZE; i++)
+        x[i] = a[i];
+}
+#endif /* ENABLE_GE25519_MATH */
+
 
 int ge_compress_key(byte* out, const byte* xIn, const byte* yIn,
                         word32 keySz)
 {
-    byte tmp[F25519_SIZE];
+    byte tmp[G25519_SIZE];
     byte parity;
     byte pt[32];
     int     i;
 
-    fe_copy(tmp, xIn);
+    ge_copy(tmp, xIn);
     parity = (tmp[0] & 1) << 7;
 
-    fe_copy(pt, yIn);
+    ge_copy(pt, yIn);
     pt[31] |= parity;
 
     for(i = 0; i < 32; i++) {
@@ -251,7 +268,7 @@ const ge_p3 ed25519_neutral = {
 };
 
 
-static const byte ed25519_d[F25519_SIZE] = {
+static const byte ed25519_d[G25519_SIZE] = {
     0xa3, 0x78, 0x59, 0x13, 0xca, 0x4d, 0xeb, 0x75,
     0xab, 0xd8, 0x41, 0x41, 0x4d, 0x0a, 0x70, 0x00,
     0x98, 0xe8, 0x79, 0x77, 0x79, 0x40, 0xc7, 0x8c,
@@ -260,7 +277,7 @@ static const byte ed25519_d[F25519_SIZE] = {
 
 
 /* k = 2d */
-static const byte ed25519_k[F25519_SIZE] = {
+static const byte ed25519_k[G25519_SIZE] = {
     0x59, 0xf1, 0xb2, 0x26, 0x94, 0x9b, 0xd6, 0xeb,
     0x56, 0xb1, 0x83, 0x82, 0x9a, 0x14, 0xe0, 0x00,
     0x30, 0xd1, 0xf3, 0xee, 0xf2, 0x80, 0x8e, 0x19,
@@ -291,14 +308,14 @@ void ed25519_add(ge_p3 *r,
      * compute T3 = E H
      * compute Z3 = F G
      */
-    byte a[F25519_SIZE];
-    byte b[F25519_SIZE];
-    byte c[F25519_SIZE];
-    byte d[F25519_SIZE];
-    byte e[F25519_SIZE];
-    byte f[F25519_SIZE];
-    byte g[F25519_SIZE];
-    byte h[F25519_SIZE];
+    byte a[G25519_SIZE];
+    byte b[G25519_SIZE];
+    byte c[G25519_SIZE];
+    byte d[G25519_SIZE];
+    byte e[G25519_SIZE];
+    byte f[G25519_SIZE];
+    byte g[G25519_SIZE];
+    byte h[G25519_SIZE];
 
     /* A = (Y1-X1)(Y2-X2) */
     fe_sub(c, p1->Y, p1->X);
@@ -363,13 +380,13 @@ void ed25519_double(ge_p3 *r, const ge_p3 *p)
      * compute T3 = E H
      * compute Z3 = F G
      */
-    byte a[F25519_SIZE];
-    byte b[F25519_SIZE];
-    byte c[F25519_SIZE];
-    byte e[F25519_SIZE];
-    byte f[F25519_SIZE];
-    byte g[F25519_SIZE];
-    byte h[F25519_SIZE];
+    byte a[G25519_SIZE];
+    byte b[G25519_SIZE];
+    byte c[G25519_SIZE];
+    byte e[G25519_SIZE];
+    byte f[G25519_SIZE];
+    byte g[G25519_SIZE];
+    byte h[G25519_SIZE];
 
     /* A = X1^2 */
     fe_mul__distinct(a, p->X, p->X);
@@ -444,9 +461,9 @@ void ge_scalarmult_base(ge_p3 *R,const unsigned char *nonce)
 /* pack the point h into array s */
 void ge_p3_tobytes(unsigned char *s,const ge_p3 *h)
 {
-    byte x[F25519_SIZE];
-    byte y[F25519_SIZE];
-    byte z1[F25519_SIZE];
+    byte x[G25519_SIZE];
+    byte y[G25519_SIZE];
+    byte z1[G25519_SIZE];
     byte parity;
 
     fe_inv__distinct(z1, h->Z);
@@ -457,7 +474,7 @@ void ge_p3_tobytes(unsigned char *s,const ge_p3 *h)
     fe_normalize(y);
 
     parity = (x[0] & 1) << 7;
-    fe_copy(s, y);
+    ge_copy(s, y);
     fe_normalize(s);
     s[31] |= parity;
 }
@@ -466,9 +483,9 @@ void ge_p3_tobytes(unsigned char *s,const ge_p3 *h)
 /* pack the point h into array s */
 void ge_tobytes(unsigned char *s,const ge_p2 *h)
 {
-    byte x[F25519_SIZE];
-    byte y[F25519_SIZE];
-    byte z1[F25519_SIZE];
+    byte x[G25519_SIZE];
+    byte y[G25519_SIZE];
+    byte z1[G25519_SIZE];
     byte parity;
 
     fe_inv__distinct(z1, h->Z);
@@ -479,7 +496,7 @@ void ge_tobytes(unsigned char *s,const ge_p2 *h)
     fe_normalize(y);
 
     parity = (x[0] & 1) << 7;
-    fe_copy(s, y);
+    ge_copy(s, y);
     fe_normalize(s);
     s[31] |= parity;
 }
@@ -493,16 +510,16 @@ int ge_frombytes_negate_vartime(ge_p3 *p,const unsigned char *s)
 {
 
     byte parity;
-    byte x[F25519_SIZE];
-    byte y[F25519_SIZE];
-    byte a[F25519_SIZE];
-    byte b[F25519_SIZE];
-    byte c[F25519_SIZE];
+    byte x[G25519_SIZE];
+    byte y[G25519_SIZE];
+    byte a[G25519_SIZE];
+    byte b[G25519_SIZE];
+    byte c[G25519_SIZE];
     int ret = 0;
 
     /* unpack the key s */
     parity = s[31] >> 7;
-    fe_copy(y, s);
+    ge_copy(y, s);
     y[31] &= 127;
 
     fe_mul__distinct(c, y, y);
@@ -519,11 +536,11 @@ int ge_frombytes_negate_vartime(ge_p3 *p,const unsigned char *s)
     fe_mul__distinct(a, x, x);
     fe_normalize(a);
     fe_normalize(c);
-    ret |= ConstantCompare(a, c, F25519_SIZE);
+    ret |= ConstantCompare(a, c, G25519_SIZE);
 
     /* project the key s onto p */
-    fe_copy(p->X, x);
-    fe_copy(p->Y, y);
+    ge_copy(p->X, x);
+    ge_copy(p->Y, y);
     fe_load(p->Z, 1);
     fe_mul__distinct(p->T, x, y);
 
@@ -552,13 +569,12 @@ int ge_double_scalarmult_vartime(ge_p2* R, const unsigned char *h,
     /* SB + -H(R,A,M)A */
     ed25519_add(&A, &p, &A);
 
-    fe_copy(R->X, A.X);
-    fe_copy(R->Y, A.Y);
-    fe_copy(R->Z, A.Z);
+    ge_copy(R->X, A.X);
+    ge_copy(R->Y, A.Y);
+    ge_copy(R->Z, A.Z);
 
     return ret;
 }
 
+#endif /* ED25519_SMALL */
 #endif /* HAVE_ED25519 */
-#endif /* CURVED25519_SMALL */
-

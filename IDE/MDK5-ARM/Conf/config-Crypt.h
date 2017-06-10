@@ -72,10 +72,10 @@
 #define WOLFSSL_SHA384
 #endif
 //  </e>
-//      <e>SHA-512          
+//      <e>SHA-512
 #define MDK_CONF_SHA512     1
 #if MDK_CONF_SHA512     == 1
-#define WOLFSSL_SHA512   
+#define WOLFSSL_SHA512
 #endif
 //  </e>
 //      <e>RIPEMD
@@ -180,14 +180,14 @@
 #endif
 //  </e>
 //      <e>DSA
-#define MDK_CONF_DSA 1 
+#define MDK_CONF_DSA 1
 #if MDK_CONF_DSA == 0
 #define NO_DSA
 #endif
 //  </e>
 
 //      <e>SRP
-#define MDK_CONF_SRP 1 
+#define MDK_CONF_SRP 1
 #if MDK_CONF_SRP == 1
 #define HAVE_SRP
 #endif
@@ -220,6 +220,7 @@
 #define MDK_CONF_ED25519 1
 #if MDK_CONF_ED25519 == 1
 #define HAVE_ED25519
+#define ED25519_SMALL
 #endif
 //  </e>
 
