@@ -1,0 +1,302 @@
+[ RSA + OAEP ]
+wc_RsaPublicEncrypt_ex()
+wc_RsaPrivateDecrypt_ex()
+
+; ----------------
+
+
+[ require deeper inspection ]
+
+wolfSSL_EVP_CipherInit  -> ...
+find :m'*''hm'n
+wolfSSL_PKCS12_parse    -> ?
+wolfSSL_d2i_SSL_SESSION -> ?
+wolfSSL_RAND_bytes      -> wc_RNG_GenerateBlock
+wolfSSL_BN_bn2bin       -> mp_to_unsigned_bin
+wolfSSL_BN_bin2bn       -> mp_read_unsigned_bin
+
+[ work with internal data expected to be of known size ]
+
+wolfSSL_3des_iv       -> wc_Des3_SetIV?
+wolfSSL_DSA_do_sign   -> wc_DsaSign
+wolfSSL_DSA_do_verify -> wc_Dsa_Verify
+wolfSSL_aes_ctr_iv    -> wc_AesSetIV?
+
+[ definitely work with the data as binary ]
+
+wolfSSL_BIO_BIO_write
+wolfSSL_BIO_write                               -> wolfSSL_BIO_BIO_write?
+wolfSSL_CIPHER_description
+wolfSSL_CTX_LoadCRLBuffer                       -> wolfSSL_CertManagerLoadCABuffer
+wolfSSL_CTX_LoadCRLBuffer                       -> wolfSSL_CertManagerLoadCRLBuffer
+wolfSSL_CTX_SetTmpDH_buffer                     -> wolfSSL_SetTmpDH_buffer_wrapper
+wolfSSL_CTX_UseSNI                              -> TLSX_UseSNI
+wolfSSL_CTX_load_verify_buffer                  -> ProcessBuffer
+wolfSSL_CTX_load_verify_buffer                  -> ProcessChainBuffer <?> ProcessBuffer
+wolfSSL_CTX_memrestore_cert_cache               -> CM_RestoreCertCache
+wolfSSL_CTX_trust_peer_buffer                   -> ProcessChainBuffer <?> ProcessBuffer
+wolfSSL_CTX_use_PrivateKey_buffer               -> ProcessBuffer
+wolfSSL_CTX_use_certificate_buffer              -> ProcessBuffer
+wolfSSL_CTX_use_certificate_chain_buffer        -> wolfSSL_CTX_use_certificate_chain_buffer_format
+wolfSSL_CTX_use_certificate_chain_buffer_format -> ProcessBuffer
+wolfSSL_CertManagerCheckCRL                     -> InitDecodedCent
+wolfSSL_CertManagerCheckOCSP                    -> InitDecodedCert
+wolfSSL_CertManagerLoadCABuffer                 -> wolfSSL_CTX_load_verify_buffer
+wolfSSL_CertManagerLoadCRLBuffer                -> BufferLoadCRL
+wolfSSL_CertManagerVerifyBuffer                 -> PemToDer?, InitDecodedCert
+wolfSSL_CertPemToDer                            -> PemToDer
+wolfSSL_DES_cbc_encrypt                         -> wc_Des_CbcEncrypt
+wolfSSL_DES_ede3_cbc_encrypt                    -> wc_Des3_CbcEncrypt
+wolfSSL_DES_ncbc_encrypt                        -> wc_Des_CbcEncrypt
+wolfSSL_DSA_LoadDer                             -> DsaPrivateKeyDecode
+wolfSSL_DTLS_SetCookieSecret
+wolfSSL_EC25519_shared_key                      -> wc_curve25519_import_private_ex || wc_curve25519_import_public_ex
+wolfSSL_ECDSA_do_sign                           -> wc_ecc_sign_hash_ex
+wolfSSL_ECDSA_do_verify                         -> wc_ecc_verify_hash_ex
+wolfSSL_ECPoint_d2i                             -> wc_ecc_import_point_der
+wolfSSL_EC_KEY_LoadDer                          -> wc_EccPrivateKeyDecode
+wolfSSL_ED25519_sign                            -> wc_ed25519_sign_msg || wc_ed25519_import_private_key
+wolfSSL_ED25519_verify                          -> wc_ed25519_verify_msg || wc_ed25519_import_public
+wolfSSL_EVP_BytesToKey                          -> wc_Md5Update
+wolfSSL_EVP_Cipher                              -> ...
+wolfSSL_EVP_Digest                              -> wc_Hash
+wolfSSL_EVP_DigestFinal                         -> ...
+wolfSSL_EVP_DigestFinal_ex                      -> wolfSSL_EVP_DigestFinal
+wolfSSL_EVP_DigestUpdate                        -> ...
+wolfSSL_HMAC                                    -> wc_HmacSetKey
+wolfSSL_HMAC_Update                             -> wc_HmacUpdate
+wolfSSL_KeyPemToDer                             -> PemToDer
+wolfSSL_LoadCRLBuffer                           -> wolfSSL_CertManagerLoadCABuffer
+wolfSSL_MD4_Final                               -> wc_Md4Final
+wolfSSL_MD4_Update                              -> wc_Md4Update
+wolfSSL_MD5_Final                               -> wc_Md5Final
+wolfSSL_MD5_Update                              -> wc_Md5Update
+wolfSSL_PEM_write_DSAPrivateKey                 -> wolfSSL_PEM_write_mem_DSAPrivateKey
+wolfSSL_PEM_write_ECPrivateKey                  -> wolfSSL_PEM_write_mem_RSAPrivateKey
+wolfSSL_PEM_write_RSAPrivateKey                 -> wolfSSL_PEM_write_mem_RSAPrivateKey
+wolfSSL_PEM_write_mem_DSAPrivateKey             -> EncryptDerKey
+wolfSSL_PEM_write_mem_ECPrivateKey              -> EncryptDerKey
+wolfSSL_PEM_write_mem_RSAPrivateKey             -> EncryptDerKey
+wolfSSL_PubKeyPemToDer
+wolfSSL_RSA_LoadDer                             -> wc_RsaPrivateKeyDecode
+wolfSSL_RSA_public_decrypt                      -> wc_RsaSSL_Verify
+wolfSSL_RSA_sign                                -> wc_EncodeSignature
+wolfSSL_SHA1_Final                              -> SHA_Final
+wolfSSL_SHA1_Update                             -> SHA_Update
+wolfSSL_SHA224_Final                            -> wc_Sha224Final
+wolfSSL_SHA224_Update                           -> wc_Sha224Update
+wolfSSL_SHA256_Final                            -> wc_Sha256Final
+wolfSSL_SHA256_Update                           -> wc_Sha256Update
+wolfSSL_SHA384_Final                            -> wc_Sha384Final
+wolfSSL_SHA384_Update                           -> wc_Sha384Update
+wolfSSL_SHA512_Final                            -> wc_Sha512Final
+wolfSSL_SHA512_Update                           -> wc_Sha512Update
+wolfSSL_SHA_Final                               -> wc_ShaFinal
+wolfSSL_SHA_Update                              -> wc_ShaUpdate
+wolfSSL_SNI_GetFromBuffer                       -> TLSX_SNI_GetFromBuffer
+wolfSSL_SetServerID                             -> GetSessionClient
+wolfSSL_SetTmpDH_buffer                         -> wolfSSL_SetTmpDH_buffer_wrapper
+wolfSSL_SetTmpDH_buffer_wrapper                 -> PemToDer?, wc_DhParamsLoad
+wolfSSL_TicketKeyCb                             -> wolfSSL_EVP_CipherUpdate, wolfSSL_EVP_EncryptFinal, wolfSSL_HMAC_Update <?> wolfSSL_HMAC_Update, wolfSSL_EVP_CipherUpdate, wolfSSL_EVP_DecryptFinal
+wolfSSL_UseALPN
+wolfSSL_UseSNI                                  -> TLSX_UseSNI
+wolfSSL_X509_NAME_digest                        -> wolfSSL_EVP_Digest
+wolfSSL_X509_d2i                                -> InitDecodedCert
+wolfSSL_X509_digest                             -> wolfSSL_EVP_Digest
+wolfSSL_X509_load_certificate_buffer            -> PemToDer?
+wolfSSL_dtls_import                             -> *internal
+wolfSSL_memrestore_session_cache
+wolfSSL_peek                                    -> wolfSSL_read_internal
+wolfSSL_read                                    -> wolfSSL_read_internal
+wolfSSL_read_internal                           -> ReceiveData
+wolfSSL_recv                                    -> wolfSSL_read
+wolfSSL_select_next_proto
+wolfSSL_send                                    -> wolfSSL_write
+wolfSSL_set_SessionTicket
+wolfSSL_use_PrivateKey_ASN1                     -> wolfSSL_use_PrivateKey_buffer
+wolfSSL_use_PrivateKey_buffer                   -> ProcessBuffer
+wolfSSL_use_RSAPrivateKey_ASN1                  -> wolfSSL_use_PrivateKey_buffer
+wolfSSL_use_certificate_ASN1                    -> ProcessBuffer
+wolfSSL_use_certificate_buffer                  -> ProcessBuffer
+wolfSSL_use_certificate_chain_buffer            -> wolfSSL_use_certificate_chain_buffer_format
+wolfSSL_use_certificate_chain_buffer_format     -> ProcessBuffer
+wolfSSL_write                                   -> SendData
+
+[ definitely work with the data as string ]
+
+wolfSSL_EVP_get_cipherbyname
+wolfSSL_CertManagerSetOCSPOverrideURL
+wolfSSL_SetOCSP_OverrideURL           -> wolfSSL_CertManagerSetOCSPOverrideURL
+wolfSSL_CTX_SetOCSP_OverrideURL       -> wolfSSL_CertManagerSetOCSPOverrideURL
+wolfSSL_CTX_use_RSAPrivateKey_file    -> wolfSSL_CTX_use_PrivateKey_file
+wolfSSL_CTX_set_cipher_list           -> SetCipherList
+wolfSSL_set_cipher_list               -> SetCipherList
+wolfSSL_check_domain_name
+wolfSSL_CTX_use_psk_identity_hint
+wolfSSL_use_psk_identity_hint
+wolfSSL_EVP_get_digestbyname
+wolfSSL_BN_hex2bn                     -> Base16_Decode
+wolfSSL_OBJ_sn2nid
+wolfSSL_SESSION_get_ex_new_index
+wolfSSL_set_tlsext_host_name          -> wolfSSL_UseSNI
+wolfSSL_X509_check_host               -> CheckHostName
+
+[ definitely expect the data to be a file/path ]
+
+wolfSSL_CTX_load_verify_locations      -> ProcessFile
+wolfSSL_CTX_trust_peer_cert            -> ProcessFile
+wolfSSL_CertManagerVerify
+wolfSSL_CertManagerLoadCA              -> wolfSSL_CTX_load_verify_locations
+wolfSSL_CertManagerLoadCRL             -> LoadCRL
+wolfSSL_LoadCRL                        -> wolfSSL_CertManagerLoadCRL
+wolfSSL_CTX_LoadCRL                    -> wolfSSL_CertManagerLoadCRL
+wolfSSL_CTX_der_load_verify_locations  -> ProcessFile
+wolfSSL_PemCertToDer
+wolfSSL_CTX_use_certificate_file       -> ProcessFile
+wolfSSL_CTX_use_PrivateKey_file        -> ProcessFile
+wolfSSL_CTX_use_certificate_chain_file -> ProcessFile
+wolfSSL_SetTmpDH_file_wrapper
+wolfSSL_SetTmpDH_file                  -> wolfSSL_SetTmpDH_file_wrapper
+wolfSSL_CTX_SetTmpDH_file              -> wolfSSL_SetTmpDH_file_wrapper
+wolfSSL_use_certificate_file -> ProcessFile
+wolfSSL_use_PrivateKey_file -> ProcessFile
+wolfSSL_use_certificate_chain_file -> ProcessFile
+wolfSSL_CTX_use_RSAPrivateKey_file -> wolfSSL_CTX_use_PrivateKey_file
+wolfSSL_use_RSAPrivateKey_file -> wolfSSL_use_PrivateKey_file
+wolfSSL_CTX_use_NTRUPrivateKey_file -> ProcessFile
+wolfSSL_CTX_save_cert_cache -> CM_SaveCertCache
+wolfSSL_CTX_restore_cert_cache -> CM_RestoreCertCache
+wolfSSL_save_session_cache
+wolfSSL_restore_session_cache
+wolfSSL_load_client_CA_file
+wolfSSL_X509_load_certificate_file
+wolfSSL_X509_LOOKUP_load_file
+wolfSSL_cmp_peer_cert_to_file
+wolfSSL_BIO_read_filename
+wolfSSL_ERR_peek_last_error_line -> wc_PeekErrorNode
+wolfSSL_BIO_new_file
+wolfSSL_PemPubKeyToDer
+
+[ probably don't work with the data ]
+
+wolfSSL_ALPN_FreePeerProtocol
+wolfSSL_BIO_new_mem_buf
+wolfSSL_CTX_SetTmpDH
+wolfSSL_CTX_sess_set_get_cb
+wolfSSL_CTX_set_alpn_select_cb
+wolfSSL_CTX_set_default_passwd_cb_userdata
+wolfSSL_CTX_set_ex_data
+wolfSSL_CTX_set_tlsext_status_arg
+wolfSSL_CTX_set_tlsext_ticket_key_cb
+wolfSSL_HMAC_Init -> wc_HmacSetKey
+wolfSSL_HMAC_Init_ex -> wolfSSL_HMAC_Init
+wolfSSL_RAND_seed
+wolfSSL_SESSION_set_ex_data
+wolfSSL_SetTmpDH
+wolfSSL_X509_set_ex_data
+wolfSSL_d2i_PrivateKey
+wolfSSL_dtls_set_peer
+wolfSSL_set_app_data -> wolfSSL_set_ex_data
+wolfSSL_set_dynlock_create_callback
+wolfSSL_set_ex_data
+wolfSSL_set_jobject
+wolfSSL_set_ocsp_url
+wolfSSL_set_tlsext_debug_arg
+wolfSSL_set_tlsext_status_ocsp_resp
+
+[ export onto the data array ]
+
+wolfSSL_ALPN_GetPeerProtocol
+wolfSSL_ALPN_GetProtocol       -> TLSX_ALPN_GetRequest
+wolfSSL_ASN1_TIME_to_string -> GetTimeString
+wolfSSL_BIO_BIO_read
+wolfSSL_BIO_get_mem_data
+wolfSSL_BIO_read -> wolfSSL_BIO_BIO_read?
+wolfSSL_CTX_load_static_memory
+wolfSSL_CTX_memsave_cert_cache -> CM_MemSaveCertCache
+wolfSSL_DH_compute_key -> wc_DhAgree
+wolfSSL_EC25519_generate_key -> wc_curve25519_export_key_raw_ex
+wolfSSL_ECDH_compute_key -> wc_ecc_shared_secret_ex
+wolfSSL_ECPoint_i2d -> wc_ecc_export_point_der
+wolfSSL_ED25519_generate_key -> wc_ed25519_export_key
+wolfSSL_ERR_error_string       -> SetErrorString
+wolfSSL_ERR_error_string_n     -> wolfSSL_ERR_error_string
+wolfSSL_ERR_peek_error_line_data -> wc_PeekErrorNode
+wolfSSL_HMAC_Final -> wolfSSL_HMAC_Final
+wolfSSL_SESSION_get_master_key
+wolfSSL_SNI_GetRequest -> TLSX_SNI_GetRequest
+wolfSSL_X509_NAME_get_text_by_NID
+wolfSSL_X509_NAME_oneline
+wolfSSL_X509_get_authorityKeyID
+wolfSSL_X509_get_device_type
+wolfSSL_X509_get_hw_serial_number
+wolfSSL_X509_get_hw_type
+wolfSSL_X509_get_serial_number
+wolfSSL_X509_get_signature
+wolfSSL_X509_get_subjectKeyID
+wolfSSL_dtls_export            -> *internal
+wolfSSL_dtls_get_peer
+wolfSSL_get0_alpn_selected
+wolfSSL_get_SessionTicket
+wolfSSL_get_chain_cert_pem
+wolfSSL_get_ciphers
+wolfSSL_get_client_random
+wolfSSL_get_keys
+wolfSSL_get_server_random
+wolfSSL_get_shared_ciphers
+wolfSSL_get_tlsext_status_ocsp_resp
+wolfSSL_i2d_SSL_SESSION
+wolfSSL_memsave_session_cache
+
+[ are stubs ]
+
+wolfSSL_ASN1_STRING_to_UTF8
+wolfSSL_BIO_printf
+wolfSSL_BN_dec2bn
+wolfSSL_COMP_add_compression_method
+wolfSSL_CRYPTO_set_mem_ex_functions
+wolfSSL_CTX_ctrl
+wolfSSL_CTX_get_ex_new_index
+wolfSSL_CTX_set_next_proto_select_cb
+wolfSSL_CTX_set_next_protos_advertised_cb
+wolfSSL_CTX_set_session_id_context
+wolfSSL_DH_generate_parameters
+wolfSSL_DH_generate_parameters_ex
+wolfSSL_ERR_get_error_line_data
+wolfSSL_OBJ_txt2nid
+wolfSSL_OCSP_parse_url
+wolfSSL_OPENSSL_config
+wolfSSL_PEM_def_callback
+wolfSSL_PEM_read_PUBKEY
+wolfSSL_PEM_read_PrivateKey
+wolfSSL_PEM_read_RSAPublicKey
+wolfSSL_PEM_read_X509
+wolfSSL_PEM_read_bio_PrivateKey
+wolfSSL_PEM_write_bio_DSAPrivateKey
+wolfSSL_PEM_write_bio_ECPrivateKey
+wolfSSL_PEM_write_bio_RSAPrivateKey
+wolfSSL_RAND_add
+wolfSSL_RAND_egd
+wolfSSL_RAND_file_name
+wolfSSL_RAND_load_file
+wolfSSL_RAND_set_rand_method
+wolfSSL_RAND_write_file
+wolfSSL_RSA_generate_key
+wolfSSL_RSA_private_decrypt
+wolfSSL_RSA_public_encrypt
+wolfSSL_SHA1
+wolfSSL_X509_LOOKUP_add_dir
+wolfSSL_X509_get_ex_new_index
+wolfSSL_ctrl
+wolfSSL_get0_next_proto_negotiated
+wolfSSL_get_ex_new_index
+wolfSSL_get_tlsext_status_exts
+wolfSSL_get_tlsext_status_ids
+wolfSSL_set_dynlock_destroy_callback
+wolfSSL_set_dynlock_lock_callback
+wolfSSL_set_session_id_context
+wolfSSL_set_tlsext_status_exts
+wolfSSL_set_tlsext_status_ids
+wolfSSL_sk_SSL_CIPHER_num
+wolfSSL_sk_SSL_CIPHER_value
+
