@@ -74,6 +74,7 @@ int Send(WOLFSSL* ssl, char *buf, int sz, void *ctx)
     return sz;
 }
 
+/* returns 0 on successfull execution, -1 on failure */
 int doit(struct buffer *in)
 {
     int          ret = -1;

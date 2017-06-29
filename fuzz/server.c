@@ -70,10 +70,11 @@ int Send(WOLFSSL* ssl, char *buf, int sz, void *ctx)
     (void)sz;
     (void)ctx;
 
-    /* there is no server to hear us */
+    /* there is no client to hear us */
     return sz;
 }
 
+/* returns 0 on successfull execution, -1 on failure */
 int doit(struct buffer *in)
 {
     int          ret = -1;

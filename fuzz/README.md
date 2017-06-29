@@ -1,7 +1,6 @@
 Fuzz Targets
 ============
 
-<!-- TODO: check over -->
 The files in this directory are fuzzing targets for wolfSSL. They follow the
 LLVM libFuzzer API and have a very specific naming scheme for integration with
 [Google's OSS-Fuzz service][oss-fuzz]. For more information about these
@@ -192,9 +191,8 @@ at least define `max_len`.
 An options file should be named the same as the source code, but with
 ".options" in place of ".c".
 
-The format seems to be similar to [the ini format][ini], though I could not
-find explicit confirmation of this. Regardless, a file about like this is
-suitable:
+The format seems to be similar to [the ini format][ini], though no explicit
+confirmation of this was found. Regardless, a file about like this is suitable:
 
 ```
 [libfuzzer]
@@ -281,9 +279,11 @@ target you wish to run.
 <a name="future">Future Direction</a>
 -------------------------------------
 
-No present future direction.
-
-<!-- TODO: this section -->
+Add more tests for various wolfSSL and wolfCrypt APIs. Focus on APIs which
+process buffers containing data that plausibly could originate from some
+outside source. As examples, in `server.c` the fuzzed data is impersonating a
+server, and in `pem2der.c` the fuzzed data is used as a PEM certificate. In
+each case, the fuzzed data represents malformed input.
 
 <!-- References -->
 [libFuzzer]: http://llvm.org/docs/LibFuzzer.html
