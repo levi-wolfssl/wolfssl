@@ -1,0 +1,17 @@
+#!/bin/sh
+
+dir=/.${PWD%/}
+home=/.$(cd "$(dirname "$0")" && pwd)/
+home=${home#$dir/}
+home=./${home%/}
+
+for target in "${home%/}"/*/target
+do
+    target_dir=$(dirname "$target")
+    "$target" "$target_dir"/*/*
+    target_ret=$?
+
+    [ "$target_ret" -ne 0 ] && exit 1
+done
+
+exit 0

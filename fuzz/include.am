@@ -1,0 +1,15 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+include fuzz/pem_cert/include.am
+
+if BUILD_TESTS
+dist_noinst_SCRIPTS+= fuzz/all_targets.test
+noinst_LTLIBRARIES+= fuzz/libstandalone.la
+fuzz_libstandalone_la_SOURCES = \
+    fuzz/target_main.c
+fuzz_libstandalone_la_CFLAGS       = -DNO_MAIN_DRIVER $(AM_CFLAGS)
+#fuzz_libstandalone_la_LDADD        = $(LIB_STATIC_ADD)
+fuzz_libstandalone_la_DEPENDENCIES =
+endif

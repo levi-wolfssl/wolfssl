@@ -1,0 +1,14 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+if BUILD_TESTS
+noinst_PROGRAMS += fuzz/pem_cert/target
+fuzz_pem_cert_target_SOURCES = \
+    fuzz/pem_cert/target.c
+fuzz_pem_cert_target_CFLAGS       = -DNO_MAIN_DRIVER $(AM_CFLAGS)
+fuzz_pem_cert_target_LDADD        = src/libwolfssl.la fuzz/libstandalone.la $(LIB_STATIC_ADD)
+fuzz_pem_cert_target_DEPENDENCIES = src/libwolfssl.la fuzz/libstandalone.la
+endif
+#EXTRA_DIST += tests/unit.h
+#DISTCLEANFILES+= tests/.libs/unit.test
