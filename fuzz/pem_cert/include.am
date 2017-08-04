@@ -6,9 +6,19 @@ if BUILD_TESTS
 noinst_PROGRAMS += fuzz/pem_cert/target
 fuzz_pem_cert_target_SOURCES = \
     fuzz/pem_cert/target.c
-fuzz_pem_cert_target_CFLAGS       = -DNO_MAIN_DRIVER $(AM_CFLAGS)
-fuzz_pem_cert_target_LDADD        = src/libwolfssl.la fuzz/libstandalone.la $(LIB_STATIC_ADD)
-fuzz_pem_cert_target_DEPENDENCIES = src/libwolfssl.la fuzz/libstandalone.la
+fuzz_pem_cert_target_CFLAGS       = $(AM_CFLAGS)
+fuzz_pem_cert_target_LDADD        = src/libwolfssl.la $(FUZZER_LIB) $(LIB_STATIC_ADD)
+fuzz_pem_cert_target_DEPENDENCIES = src/libwolfssl.la $(FUZZER_LIB)
+
+if REMOTE_FUZZER_LIB
+CXXLINK = /bin/sh ./libtool --silent --tag=CXX --mode=link $(CXX) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+#fuzz_pem_cert_target_LINK = echo === $(CXXLINK) ===
+fuzz_pem_cert_target_LINK = $(CXXLINK)
+else
+#fuzz_pem_cert_target_LINK = echo === $(LINK) ===
+fuzz_pem_cert_target_LINK = $(LINK)
+endif
+
 endif
 #EXTRA_DIST += tests/unit.h
 #DISTCLEANFILES+= tests/.libs/unit.test

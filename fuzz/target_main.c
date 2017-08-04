@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     uint8_t *data = NULL;
     FILE    *file = NULL;
 
-    /* @temporary: long, long name. Get a shorter one. */
+    /* @temporary: long name. Get a shorter one. */
     printf("%s:\n", argv[0]);
 
     /* @temporary: assume every argument is a file */
