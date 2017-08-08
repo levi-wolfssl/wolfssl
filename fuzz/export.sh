@@ -45,6 +45,7 @@ do
     [ -f "$target" ] || continue
 
     target_dir=${target%/target}
+    lib_target=$target_dir/.libs/target
     target_name=${target_dir#$home/}
 
     cd "$target_dir" || continue
@@ -53,30 +54,19 @@ do
     ### Note ##################################################################
     # We have to make sure we don't pick up the libtool script instead of the
     # proper executable, so we're going to check 'target' and '.libs/target'.
-    # As best as I can tell, the command 'file' is a rather portable, so we'll
-    # use it to evaluate what kind of file each one is. We'll ask for a mime
-    # type rather than the default, more human readable output. Hopefully this
-    # is well defined.
+    # We're going to accomplish this by reading in the first two bytes of the
+    # file and assume that a script will show '#!' first. Using a utility
+    # called 'file' would probably be more robust, but I couldn't get OSS-Fuzz
+    # (the primary user of this script) to run 'file'.
     #
-    fuzz_mime=$(file -b --mime-type "$target")
-    if [ -f "$target_dir"/.libs/target ]
-    then
-        libs_mime=$(file -b --mime-type "$target_dir/.libs/target")
-    else
-        libs_mime=
-    fi
-
-    # learn the executable mime-type from /bin/sh (-L to dereference links)
-    exec_mime=$(file -b -L --mime-type /bin/sh)
-
-    if [ "$fuzz_mime" = "$exec_mime" ]
+    if [ "$(head -c 2 "$target")" != "#!" ]
     then
         target_exe=$target
-    elif  [ "$libs_mime" = "$exec_mime" ]
+    elif  [ -f "$lib_target" ] && [ "$(head -c 2 "$lib_target")" != "#!" ]
     then
-        target_exe=$target_dir/.libs/target
+        target_exe=$lib_target
     else
-        echo "ERROR: no binary executable found in the usual locations!" >&2
+        echo "ERROR: only scripts (or nothing) in the usual locations!" >&2
         continue
     fi
 
