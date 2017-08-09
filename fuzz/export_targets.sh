@@ -49,7 +49,7 @@ do
     target_name=${target_dir#$home/}
 
     cd "$target_dir" || continue
-    printf "%s: %s\n" "$(basename "$0")" "${target_name}_target"
+    printf "%s: %s\n" "$(basename "$0")" "${target_name}"
 
     ### Note ##################################################################
     # We have to make sure we don't pick up the libtool script instead of the
@@ -71,8 +71,8 @@ do
     fi
 
     # export the executable to the $out directory
-    cp "$target_exe" "$out/${target_name}_target"
-    report "CP" "${target_name}_target"
+    cp "$target_exe" "$out/${target_name}"
+    report "CP" "${target_name}"
 
     options=$target_dir/target.options
     if [ -f "$options" ]
